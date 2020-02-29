@@ -2,6 +2,11 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 import re
+from boilerpy3 import extractors
+
+extractor = extractors.ArticleExtractor()
+
+EXTRACTOR = ('https://boilerpipe-web.appspot.com/extract?url=', '&extractor=ArticleExtractor&output=htmlFragment&extractImages=&token=')
 
 records = set()
 
@@ -13,8 +18,9 @@ reddit_links = [
     "https://www.reddit.com/r/TechNewsToday/top/.rss?limit=100",
     "https://www.reddit.com/r/TechNewsToday/.rss?limit=100",
 ]
-for url in reddit_links:
 
+for url in reddit_links:
+    print('polling {}'.format(url))
     user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
     request = urllib.request.Request(url,headers={'User-Agent': user_agent})
     response = urllib.request.urlopen(request)
@@ -22,7 +28,6 @@ for url in reddit_links:
 
     soup = BeautifulSoup(html,"xml")
     content = soup.find_all('content')
-
 
     for link in content:
         clean = str(link).replace('&amp;', '&')
@@ -33,5 +38,17 @@ for url in reddit_links:
         link = link_end[link_end.find('<span><a href="')+15:]
         records.add(link)
 
-[print(rec) for rec in records]
-print(len(records))
+print('links extracted...')
+
+artcles = []
+errors = []
+for link in records:
+    print('getting article {}'.format(link))
+    try:
+        doc = extractor.get_content_from_url(link)
+        artcles.append(doc)
+    except Exception as e:
+        errors.append(e)
+
+[print(a) for a in artcles]
+[print(err) for err in errors]
