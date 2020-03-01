@@ -3,9 +3,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from datetime import datetime, timedelta
 from extract import extractor
-
+from timeloop import Timeloop
 import os
 
+tl = Timeloop()
 
 # Init app
 app = Flask(__name__)
@@ -107,7 +108,17 @@ def delete_article(id):
     return article_schema.jsonify(article)
 
 @app.route('/run', methods=['GET'])
+def start_scheduler():
+    tl.start(block=True)
+
+@app.route('/stop', methods=['GET'])
+def stop_scheduler():
+    tl.stop()
+
+
+@tl.job(interval=timedelta(minutes=10))
 def run_extractor():
+    print('running extractor: {}'.format(str(datetime.now())))
     articles = extractor()
     for article in articles:
         add_article(article)

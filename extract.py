@@ -45,7 +45,6 @@ def extractor():
         try:
             doc = extractor.get_content_from_url(link)
             artcles.append({'title': 'test', 'body': doc, 'link': link})
-            break
         except Exception as e:
             errors.append(e)
     return artcles
