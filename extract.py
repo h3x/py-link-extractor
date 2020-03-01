@@ -10,11 +10,11 @@ def extractor():
 
     reddit_links = [
         "https://www.reddit.com/r/news/top/.rss?limit=100",
-        "https://www.reddit.com/r/worldnews/top/.rss?limit=100",
-        "https://www.reddit.com/r/news/.rss?limit=100",
-        "https://www.reddit.com/r/worldnews/.rss?limit=100",
-        "https://www.reddit.com/r/TechNewsToday/top/.rss?limit=100",
-        "https://www.reddit.com/r/TechNewsToday/.rss?limit=100",
+        # "https://www.reddit.com/r/worldnews/top/.rss?limit=100",
+        # "https://www.reddit.com/r/news/.rss?limit=100",
+        # "https://www.reddit.com/r/worldnews/.rss?limit=100",
+        # "https://www.reddit.com/r/TechNewsToday/top/.rss?limit=100",
+        # "https://www.reddit.com/r/TechNewsToday/.rss?limit=100",
     ]
 
     for url in reddit_links:
@@ -38,15 +38,22 @@ def extractor():
 
     print('links extracted...')
 
-    artcles = []
+    articles = []
     errors = []
+    j = 0
     for link in records:
         print('getting article {}'.format(link))
         try:
-            doc = extractor.get_content_from_url(link)
-            artcles.append({'title': 'test', 'body': doc, 'link': link})
+            doc = extractor.get_doc_from_url(link)
+            title = doc.title or ''
+            body = doc.content or ''
+            articles.append({'title': title, 'body': body, 'link': link})
+            if j == 5:
+                break
+            j += 1
         except Exception as e:
             errors.append(e)
-    return artcles
-    # [print(a) for a in artcles]
-    # [print(err) for err in errors]
+    return articles
+
+if __name__ == '__main__':
+    print(extractor())

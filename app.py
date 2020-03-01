@@ -3,10 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from datetime import datetime, timedelta
 from extract import extractor
-from timeloop import Timeloop
+import threading
 import os
-
-tl = Timeloop()
 
 # Init app
 app = Flask(__name__)
@@ -107,28 +105,21 @@ def delete_article(id):
     db.session.commit()
     return article_schema.jsonify(article)
 
-@app.route('/run', methods=['GET'])
-def start_scheduler():
-    tl.start(block=True)
-
-@app.route('/stop', methods=['GET'])
-def stop_scheduler():
-    tl.stop()
-
-
-@tl.job(interval=timedelta(minutes=10))
 def run_extractor():
     print('running extractor: {}'.format(str(datetime.now())))
     articles = extractor()
     for article in articles:
-        add_article(article)
-    return app.response_class(
-        response="extractor run",
-        status=200,
-        mimetype='application/json'
-    )
+        if not db.session.query(Article.id).filter_by(title=article.get('title')).count():
+            print('Adding to database: {}'.format(article.get('title')))
+            with app.app_context():
+                add_article(article)
+        else:
+            print('skipping: {}'.format(article.get('title', 'error')))
 
+    # cron
+    threading.Timer(30, run_extractor).start()
 
 # Run server
 if __name__ == '__main__':
-    app.run(debug=True)
+    threading.Timer(3, run_extractor).start()
+    app.run(debug=False)
