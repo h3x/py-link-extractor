@@ -4,17 +4,16 @@ from bs4 import BeautifulSoup
 from boilerpy3 import extractors
 
 def extractor():
-    extractor = extractors.ArticleExtractor()
 
     records = set()
 
     reddit_links = [
         "https://www.reddit.com/r/news/top/.rss?limit=100",
-        # "https://www.reddit.com/r/worldnews/top/.rss?limit=100",
-        # "https://www.reddit.com/r/news/.rss?limit=100",
-        # "https://www.reddit.com/r/worldnews/.rss?limit=100",
-        # "https://www.reddit.com/r/TechNewsToday/top/.rss?limit=100",
-        # "https://www.reddit.com/r/TechNewsToday/.rss?limit=100",
+        "https://www.reddit.com/r/worldnews/top/.rss?limit=100",
+        "https://www.reddit.com/r/news/.rss?limit=100",
+        "https://www.reddit.com/r/worldnews/.rss?limit=100",
+        "https://www.reddit.com/r/TechNewsToday/top/.rss?limit=100",
+        "https://www.reddit.com/r/TechNewsToday/.rss?limit=100",
     ]
 
     for url in reddit_links:
@@ -37,20 +36,22 @@ def extractor():
             records.add(link)
 
     print('links extracted...')
+    return records
 
+
+def retriever(links = []):
+
+    extractor = extractors.ArticleExtractor()
     articles = []
     errors = []
-    j = 0
-    for link in records:
+    for link in links:
         print('getting article {}'.format(link))
         try:
             doc = extractor.get_doc_from_url(link)
             title = doc.title or ''
             body = doc.content or ''
             articles.append({'title': title, 'body': body, 'link': link})
-            if j == 5:
-                break
-            j += 1
+            
         except Exception as e:
             errors.append(e)
     return articles

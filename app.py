@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from datetime import datetime, timedelta
-from extract import extractor
+from extract import extractor, retriever
 import threading
 import os
 
@@ -107,19 +107,25 @@ def delete_article(id):
 
 def run_extractor():
     print('running extractor: {}'.format(str(datetime.now())))
+    new_articles = []
     articles = extractor()
     for article in articles:
         if not db.session.query(Article.id).filter_by(title=article.get('title')).count():
+            print('sorting articles...')
+            new_articles.append(article)
+
+    retrieved = retriever(new_articles)
+
+    for article in retrieved:
             print('Adding to database: {}'.format(article.get('title')))
             with app.app_context():
                 add_article(article)
-        else:
-            print('skipping: {}'.format(article.get('title', 'error')))
 
-    # cron
-    threading.Timer(30, run_extractor).start()
+    print("Finished....Cron waiting...{}".format(str(datetime.now())))
+    # cron -> 30min
+    threading.Timer(30*60, run_extractor).start()
 
 # Run server
 if __name__ == '__main__':
     threading.Timer(3, run_extractor).start()
-    app.run(debug=False)
+    app.run(debug=False, host='0.0.0.0')
