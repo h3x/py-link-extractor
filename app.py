@@ -110,7 +110,7 @@ def run_extractor():
     new_articles = []
     articles = extractor()
     for article in articles:
-        if not db.session.query(Article.id).filter_by(title=article.get('title')).count():
+        if not db.session.query(Article.id).filter_by(link=article).count():
             print('sorting articles...')
             new_articles.append(article)
 

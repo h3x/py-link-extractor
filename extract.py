@@ -3,6 +3,7 @@ import urllib
 from bs4 import BeautifulSoup
 from boilerpy3 import extractors
 
+errors = []
 def extractor():
 
     records = set()
@@ -33,17 +34,15 @@ def extractor():
             clean = clean.replace('&gt;', '>')
             link_end = clean[:clean.find('">[link]')]
             link = link_end[link_end.find('<span><a href="')+15:]
-            records.add(link)
+            if link not in errors:
+                records.add(link)
 
     print('links extracted...')
     return records
 
-
-def retriever(links = []):
-
+def retriever(links=[]):
     extractor = extractors.ArticleExtractor()
     articles = []
-    errors = []
     for link in links:
         print('getting article {}'.format(link))
         try:
@@ -53,7 +52,7 @@ def retriever(links = []):
             articles.append({'title': title, 'body': body, 'link': link})
             
         except Exception as e:
-            errors.append(e)
+            errors.append(link)
     return articles
 
 if __name__ == '__main__':
