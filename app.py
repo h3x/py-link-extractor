@@ -108,15 +108,16 @@ def delete_article(id):
 def run_extractor():
     print('running extractor: {}'.format(str(datetime.now())))
     new_articles = []
-    articles = extractor()
-    for article in articles:
-        if not db.session.query(Article.id).filter_by(link=article).count():
-            print('sorting articles...')
-            new_articles.append(article)
+    links = extractor()
+    for link in links:
+        if not db.session.query(Article.id).filter_by(link=link).count():
+            # print('new article: {}'.format(link))
+            new_articles.append(link)
 
     retrieved = retriever(new_articles)
 
     for article in retrieved:
+        if not db.session.query(Article.id).filter_by(title=article.get('title')).count():
             print('Adding to database: {}'.format(article.get('title')))
             with app.app_context():
                 add_article(article)

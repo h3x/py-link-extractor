@@ -3,7 +3,9 @@ import urllib
 from bs4 import BeautifulSoup
 from boilerpy3 import extractors
 
-errors = []
+errors = ['https://www.aa.com.tr/en/turkey/over-76-300-migrants-leave-turkey-to-reach-europe/1750484', 
+            'https://www.miamiherald.com/news/nation-world/world/americas/haiti/article240650527.html',
+            'https://www.miamiherald.com/news/local/marijuana/article240226636.html#storylink=sectionheadlines']
 def extractor():
 
     records = set()
@@ -44,7 +46,7 @@ def retriever(links=[]):
     extractor = extractors.ArticleExtractor()
     articles = []
     for link in links:
-        print('getting article {}'.format(link))
+        # print('getting article {}'.format(link))
         try:
             doc = extractor.get_doc_from_url(link)
             title = doc.title or ''
